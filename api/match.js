@@ -43,14 +43,10 @@ module.exports = (req, res) => {
       "title": "🏏 England vs West Indies - WILLOW",
       "logo": "http://api.sofascore.com/api/v1/unique-tournament/11185/image/dark",
       "group": "Cricket",
-      "url": "https://otte.live.fly.ww.aiv-cdn.net/sin-nitro/live/clients/dash/enc/cqqpbb9tmi/out/v1/62a1d9fa14bb4acfad5085e413df06c0/cenc.mpd",
-      "type": "dash",
+      "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+      "type": "hls",
       "headers": {},
-      "drm": {
-        "type": "clearkey",
-        "keyId": "0aec2fcbea8d842e2d6196fc12fc5208",
-        "key": "ea343Yey5fNjkT37Rdfpc3NWwY6vLZXoCtT3"
-      }
+      "drm": null
     }
 
     // ✅ NAYA MATCH ADD KARNA HO TO:
