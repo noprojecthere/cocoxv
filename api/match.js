@@ -1,4 +1,4 @@
-module.exports = (req, res) => {
+module.exports = function(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', '*');
@@ -6,7 +6,7 @@ module.exports = (req, res) => {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const { id } = req.query;
+  var id = req.query.id;
   if (!id) {
     return res.status(400).json({
       error: 'Match ID required',
@@ -15,8 +15,8 @@ module.exports = (req, res) => {
     });
   }
 
-  const matches = getMatches();
-  const safeId = id.replace(/[^a-zA-Z0-9_-]/g, '');
+  var matches = getMatches();
+  var safeId = id.replace(/[^a-zA-Z0-9_-]/g, '');
 
   if (matches[safeId]) {
     return res.status(200).json(matches[safeId]);
@@ -70,7 +70,7 @@ function getMatches() {
     },
 
     "testdash": {
-      "title": "🧪 Test - DASH Stream",
+      "title": "🧪 Test - DASH Big Buck Bunny",
       "logo": "",
       "group": "Test",
       "url": "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd",
