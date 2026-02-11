@@ -102,7 +102,7 @@
     .dbg{background:var(--bgc);padding:14px 18px;border-top:1px solid rgba(255,255,255,.04);display:none}
     .dbg.show{display:block}
     .dbg h4{color:var(--acc);font-size:12px;margin-bottom:8px;cursor:pointer}
-    .dbg pre{background:rgba(0,0,0,.3);padding:10px;border-radius:8px;font-size:10px;color:var(--txd);overflow-x:auto;max-height:200px;overflow-y:auto;white-space:pre-wrap;word-break:break-all}
+    .dbg pre{background:rgba(0,0,0,.3);padding:10px;border-radius:8px;font-size:10px;color:var(--txd);overflow-x:auto;max-height:250px;overflow-y:auto;white-space:pre-wrap;word-break:break-all}
     @media(max-width:768px){
       .hdr{padding:10px 12px}.hdr-t{font-size:13px}
       .cb{width:32px;height:32px}.cb .material-icons-round{font-size:19px}
@@ -112,9 +112,7 @@
   </style>
 </head>
 <body>
-
 <div class="loader" id="loader"><div class="spin"></div><p>Loading Stream...</p></div>
-
 <div class="err" id="errS">
   <span class="material-icons-round">error_outline</span>
   <h2>Stream Error</h2>
@@ -122,19 +120,18 @@
   <pre id="errD" style="display:none"></pre>
   <a href="/">← Go Home</a>
 </div>
-
 <div class="land" id="land">
   <div class="land-logo">🎬</div>
   <h1>Stream Player</h1>
-  <p>HLS, DASH, ClearKey DRM streams with custom headers support.</p>
+  <p>HLS, DASH, ClearKey DRM with custom headers support.</p>
   <div class="ubox">
     <h3>📌 How to Use</h3>
-    <code>yoursite.vercel.app/?id=match1</code>
-    <code>yoursite.vercel.app/?id=match2</code>
-    <code>yoursite.vercel.app/?id=testdash</code>
+    <code>?id=test</code>
+    <code>?id=testdash</code>
+    <code>?id=testdrm</code>
+    <code>?id=testproxy</code>
   </div>
 </div>
-
 <div id="main" style="display:none">
   <header class="hdr">
     <div class="hdr-logo">🎬</div>
@@ -144,165 +141,222 @@
     </div>
     <img id="mL" class="m-logo" src="" alt="" style="display:none">
   </header>
-  <div class="pw">
-    <div class="pb" id="pB">
-      <video id="vid" playsinline></video>
-      <div class="buf" id="bufO"><div class="spin"></div></div>
-      <div class="bp" id="bigP"><span class="material-icons-round">play_arrow</span></div>
-      <div class="tst" id="tst"><span class="material-icons-round" id="tI"></span><span id="tT"></span></div>
-      <div class="sz l"><div class="sb" id="sL"><span class="material-icons-round">replay_10</span><span>10s</span></div></div>
-      <div class="sz r"><div class="sb" id="sR"><span class="material-icons-round">forward_10</span><span>10s</span></div></div>
-      <div class="ct" id="ct">
-        <div class="prw" id="prW">
-          <div class="prb"><div class="prbf" id="prBf"></div><div class="prpl" id="prPl"></div><div class="prth" id="prTh"></div></div>
+  <div class="pw"><div class="pb" id="pB">
+    <video id="vid" playsinline></video>
+    <div class="buf" id="bufO"><div class="spin"></div></div>
+    <div class="bp" id="bigP"><span class="material-icons-round">play_arrow</span></div>
+    <div class="tst" id="tst"><span class="material-icons-round" id="tI"></span><span id="tT"></span></div>
+    <div class="sz l"><div class="sb" id="sL"><span class="material-icons-round">replay_10</span><span>10s</span></div></div>
+    <div class="sz r"><div class="sb" id="sR"><span class="material-icons-round">forward_10</span><span>10s</span></div></div>
+    <div class="ct">
+      <div class="prw" id="prW"><div class="prb"><div class="prbf" id="prBf"></div><div class="prpl" id="prPl"></div><div class="prth" id="prTh"></div></div></div>
+      <div class="cr">
+        <div class="cl">
+          <button class="cb" id="ppB"><span class="material-icons-round" id="ppI">play_arrow</span></button>
+          <button class="cb" id="skB"><span class="material-icons-round">replay_10</span></button>
+          <button class="cb" id="skF"><span class="material-icons-round">forward_10</span></button>
+          <div class="vg"><button class="cb" id="mtB"><span class="material-icons-round" id="vI">volume_up</span></button><div class="vsw"><input type="range" class="vs" id="vS" min="0" max="100" value="100"></div></div>
+          <span class="tm" id="tmD">0:00 / LIVE</span>
         </div>
-        <div class="cr">
-          <div class="cl">
-            <button class="cb" id="ppB"><span class="material-icons-round" id="ppI">play_arrow</span></button>
-            <button class="cb" id="skB"><span class="material-icons-round">replay_10</span></button>
-            <button class="cb" id="skF"><span class="material-icons-round">forward_10</span></button>
-            <div class="vg">
-              <button class="cb" id="mtB"><span class="material-icons-round" id="vI">volume_up</span></button>
-              <div class="vsw"><input type="range" class="vs" id="vS" min="0" max="100" value="100"></div>
+        <div class="crr">
+          <button class="cb" id="spB"><span class="material-icons-round">speed</span>
+            <div class="mn" id="spM">
+              <div class="mn-o" data-s="0.25">0.25x</div><div class="mn-o" data-s="0.5">0.5x</div><div class="mn-o" data-s="0.75">0.75x</div>
+              <div class="mn-o act" data-s="1">Normal</div><div class="mn-o" data-s="1.25">1.25x</div><div class="mn-o" data-s="1.5">1.5x</div><div class="mn-o" data-s="2">2x</div>
             </div>
-            <span class="tm" id="tmD">0:00 / LIVE</span>
-          </div>
-          <div class="crr">
-            <button class="cb" id="spB">
-              <span class="material-icons-round">speed</span>
-              <div class="mn" id="spM">
-                <div class="mn-o" data-s="0.25">0.25x</div>
-                <div class="mn-o" data-s="0.5">0.5x</div>
-                <div class="mn-o" data-s="0.75">0.75x</div>
-                <div class="mn-o act" data-s="1">Normal</div>
-                <div class="mn-o" data-s="1.25">1.25x</div>
-                <div class="mn-o" data-s="1.5">1.5x</div>
-                <div class="mn-o" data-s="2">2x</div>
-              </div>
-            </button>
-            <button class="cb" id="qB">
-              <span class="material-icons-round">tune</span>
-              <div class="mn" id="qM"><div class="mn-t">Quality</div><div class="mn-o act" data-lv="-1">Auto</div></div>
-            </button>
-            <button class="cb" id="piB"><span class="material-icons-round">picture_in_picture_alt</span></button>
-            <button class="cb" id="fsB"><span class="material-icons-round" id="fsI">fullscreen</span></button>
-          </div>
+          </button>
+          <button class="cb" id="qB"><span class="material-icons-round">tune</span>
+            <div class="mn" id="qM"><div class="mn-t">Quality</div><div class="mn-o act" data-lv="-1">Auto</div></div>
+          </button>
+          <button class="cb" id="piB"><span class="material-icons-round">picture_in_picture_alt</span></button>
+          <button class="cb" id="fsB"><span class="material-icons-round" id="fsI">fullscreen</span></button>
         </div>
       </div>
     </div>
-  </div>
-  <div class="inf">
-    <div class="inf-r">
-      <span class="tb" id="sT">—</span>
-      <div class="ch"><span class="material-icons-round">hd</span><span id="cQ">Auto</span></div>
-      <div class="ch"><span class="material-icons-round">speed</span><span id="cS">1x</span></div>
-      <div class="ch" id="dC" style="display:none"><span class="material-icons-round">lock</span><span>ClearKey</span></div>
-      <div class="ch" id="pC" style="display:none"><span class="material-icons-round">vpn_lock</span><span>Proxy</span></div>
-    </div>
-  </div>
-  <div class="dbg" id="dbg">
-    <h4 onclick="document.getElementById('dbg').classList.remove('show')">🔧 Debug (click to close)</h4>
-    <pre id="dbgLog"></pre>
-  </div>
+  </div></div>
+  <div class="inf"><div class="inf-r">
+    <span class="tb" id="sT">—</span>
+    <div class="ch"><span class="material-icons-round">hd</span><span id="cQ">Auto</span></div>
+    <div class="ch"><span class="material-icons-round">speed</span><span id="cS">1x</span></div>
+    <div class="ch" id="dC" style="display:none"><span class="material-icons-round">lock</span><span>ClearKey</span></div>
+    <div class="ch" id="pC" style="display:none"><span class="material-icons-round">vpn_lock</span><span>Proxy</span></div>
+  </div></div>
+  <div class="dbg" id="dbg"><h4 onclick="document.getElementById('dbg').classList.remove('show')">🔧 Debug (click close)</h4><pre id="dbgLog"></pre></div>
 </div>
 
 <script>
-const $=id=>document.getElementById(id);
-const vid=$('vid'),pB=$('pB'),loader=$('loader'),errS=$('errS'),errM=$('errM'),errD=$('errD');
-const land=$('land'),main=$('main');
-const bigP=$('bigP'),bufO=$('bufO'),ppB=$('ppB'),ppI=$('ppI');
-const skB=$('skB'),skF=$('skF'),mtB=$('mtB'),vI=$('vI'),vS=$('vS'),tmD=$('tmD');
-const prW=$('prW'),prPl=$('prPl'),prBf=$('prBf'),prTh=$('prTh');
-const qB=$('qB'),qM=$('qM'),spB=$('spB'),spM=$('spM');
-const piB=$('piB'),fsB=$('fsB'),fsI=$('fsI');
-const tst=$('tst'),tI=$('tI'),tT=$('tT');
-const mT=$('mT'),mG=$('mG'),mL=$('mL');
-const sT=$('sT'),cQ=$('cQ'),cS=$('cS'),dC=$('dC'),pC=$('pC');
-const dbgEl=$('dbg'),dbgLog=$('dbgLog');
+var $=function(id){return document.getElementById(id)};
+var vid=$('vid'),pB=$('pB'),loader=$('loader'),errS=$('errS'),errM=$('errM'),errD=$('errD');
+var land=$('land'),main=$('main'),bigP=$('bigP'),bufO=$('bufO');
+var ppB=$('ppB'),ppI=$('ppI'),skB=$('skB'),skF=$('skF');
+var mtB=$('mtB'),vI=$('vI'),vS=$('vS'),tmD=$('tmD');
+var prW=$('prW'),prPl=$('prPl'),prBf=$('prBf'),prTh=$('prTh');
+var qB=$('qB'),qM=$('qM'),spB=$('spB'),spM=$('spM');
+var piB=$('piB'),fsB=$('fsB'),fsI=$('fsI');
+var tst=$('tst'),tI=$('tI'),tT=$('tT');
+var mT=$('mT'),mG=$('mG'),mL=$('mL');
+var sT=$('sT'),cQ=$('cQ'),cS=$('cS'),dC=$('dC'),pC=$('pC');
+var dbgEl=$('dbg'),dbgLog=$('dbgLog');
 
-let hlsP=null,dashP=null,mData=null,ctTO=null,tsTO=null,dbTO2=null,taps=0,logs=[];
+var hlsP=null,dashP=null,mData=null;
+var ctTO=null,tsTO=null,dbTO2=null,taps=0,logs=[];
 
 function log(m){
-  const t=new Date().toLocaleTimeString();
-  logs.push('['+t+'] '+m);
-  if(logs.length>80)logs.shift();
+  logs.push('['+new Date().toLocaleTimeString()+'] '+m);
+  if(logs.length>100)logs.shift();
   dbgLog.textContent=logs.join('\n');
-  dbgLog.scrollTop=dbgLog.scrollHeight;
+  dbgLog.scrollTop=999999;
   console.log('[P]',m);
 }
 
-mT.addEventListener('dblclick',()=>dbgEl.classList.toggle('show'));
+mT.addEventListener('dblclick',function(){dbgEl.classList.toggle('show')});
 
-function gId(){return new URLSearchParams(window.location.search).get('id')}
+// ================================
+// KEY CONVERSION - THE REAL FIX
+// ================================
+function toBase64url(input){
+  if(!input) return null;
+  input = input.trim();
 
-// ========================
-// INIT
-// ========================
-async function init(){
-  const id=gId();
-  if(!id){loader.classList.add('hide');land.classList.add('show');return}
-  log('Match ID: '+id);
-  try{
-    const r=await fetch('/api/match?id='+encodeURIComponent(id));
-    if(!r.ok){let e;try{e=await r.json()}catch(x){e={error:'Not found'}};shErr(e.error,JSON.stringify(e,null,2));return}
-    mData=await r.json();
-    log('Loaded: '+mData.title);
-    setUI();
-    startP();
-  }catch(e){shErr('Failed: '+e.message)}
+  // 1) Check if HEX (only 0-9 a-f A-F, even length)
+  if(/^[0-9a-fA-F]+$/.test(input) && input.length % 2 === 0){
+    log('Converting HEX → base64url: '+input.substring(0,20)+'...');
+    try{
+      var bytes=[];
+      for(var i=0;i<input.length;i+=2){
+        bytes.push(parseInt(input.substr(i,2),16));
+      }
+      var binary='';
+      for(var j=0;j<bytes.length;j++){
+        binary += String.fromCharCode(bytes[j]);
+      }
+      var b64=btoa(binary);
+      var result=b64.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+      log('Result: '+result);
+      return result;
+    }catch(e){
+      log('Hex conversion failed: '+e.message);
+      return input;
+    }
+  }
+
+  // 2) Check if standard BASE64 (has + or / or =)
+  if(input.indexOf('+')!==-1 || input.indexOf('/')!==-1 || input.indexOf('=')!==-1){
+    log('Converting BASE64 → base64url');
+    var result=input.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+    log('Result: '+result);
+    return result;
+  }
+
+  // 3) Already BASE64URL or unknown format - use as-is
+  log('Using as-is (base64url or raw): '+input.substring(0,20));
+  return input;
 }
 
-function shErr(m,d){loader.classList.add('hide');errM.textContent=m||'Error';if(d){errD.textContent=d;errD.style.display='block'}errS.classList.add('show')}
+// ================================
+// INIT
+// ================================
+function gId(){return new URLSearchParams(window.location.search).get('id')}
+
+async function init(){
+  var id=gId();
+  if(!id){loader.classList.add('hide');land.classList.add('show');return}
+  log('Loading: '+id);
+  try{
+    var r=await fetch('/api/match?id='+encodeURIComponent(id));
+    if(!r.ok){var e;try{e=await r.json()}catch(x){e={error:'Not found'}};shErr(e.error,JSON.stringify(e,null,2));return}
+    mData=await r.json();
+    log('Title: '+mData.title);
+    log('Type: '+mData.type);
+    log('URL: '+mData.url);
+    if(mData.drm)log('DRM: '+mData.drm.type+' KID:'+mData.drm.keyId+' KEY:'+mData.drm.key);
+    if(mData.headers)log('Headers: '+JSON.stringify(mData.headers));
+    setUI();startP();
+  }catch(e){log('ERROR: '+e.message);shErr('Failed: '+e.message)}
+}
+
+function shErr(m,d){
+  loader.classList.add('hide');
+  errM.textContent=m||'Error';
+  if(d){errD.textContent=d;errD.style.display='block'}
+  errS.classList.add('show');
+}
 
 function setUI(){
-  mT.textContent=mData.title||'Stream';mG.textContent=mData.group||'Live';document.title=mData.title||'Player';
-  if(mData.logo){mL.src=mData.logo;mL.style.display='block';mL.onerror=()=>mL.style.display='none'}
+  mT.textContent=mData.title||'Stream';mG.textContent=mData.group||'Live';
+  document.title=mData.title||'Player';
+  if(mData.logo){mL.src=mData.logo;mL.style.display='block';mL.onerror=function(){mL.style.display='none'}}
   sT.textContent=(mData.type||'?').toUpperCase();
   if(mData.drm)dC.style.display='flex';
   if(mData.headers&&Object.keys(mData.headers).length>0)pC.style.display='flex';
 }
 
+// ================================
+// START PLAYER
+// ================================
 function startP(){
-  const u=mData.url,t=mData.type||aT(u),h=mData.headers||{},d=mData.drm,hH=Object.keys(h).length>0;
-  log('Type:'+t+' Proxy:'+hH+' DRM:'+(d?d.type:'none'));
+  var u=mData.url, t=mData.type||aT(u), h=mData.headers||{}, d=mData.drm;
+  var hH=Object.keys(h).length>0;
+  log('Starting: type='+t+' proxy='+hH+' drm='+(d?d.type:'none'));
   try{
-    if(t==='hls')iHLS(u,h,hH);
-    else if(t==='dash')iDASH(u,h,d);
+    if(t==='hls') iHLS(u,h,hH);
+    else if(t==='dash') iDASH(u,h,d);
     else{vid.src=hH?pU(u,h):u;vid.load()}
-  }catch(e){log('ERROR: '+e.message);shErr('Player error: '+e.message)}
+  }catch(e){log('START ERROR: '+e.message);shErr(e.message)}
   loader.classList.add('hide');main.style.display='block';
 }
 
-function aT(u){if(u.includes('.m3u8'))return'hls';if(u.includes('.mpd'))return'dash';return'direct'}
+function aT(u){if(u.indexOf('.m3u8')!==-1)return'hls';if(u.indexOf('.mpd')!==-1)return'dash';return'direct'}
 function pU(u,h){return'/api/proxy?url='+encodeURIComponent(u)+'&headers='+encodeURIComponent(JSON.stringify(h))}
 
-// ========================
+// ================================
 // HLS
-// ========================
+// ================================
 function iHLS(u,h,up){
-  if(!Hls.isSupported()){
+  if(typeof Hls==='undefined'||!Hls.isSupported()){
     if(vid.canPlayType('application/vnd.apple.mpegurl')){vid.src=up?pU(u,h):u;vid.load();return}
     shErr('HLS not supported');return;
   }
-  const src=up?pU(u,h):u;
-  log('HLS src: '+src.substring(0,80));
-  hlsP=new Hls({maxBufferLength:30,maxMaxBufferLength:60,enableWorker:true,startLevel:-1,fragLoadingTimeOut:20000,manifestLoadingTimeOut:15000});
-  hlsP.loadSource(src);hlsP.attachMedia(vid);
-  hlsP.on(Hls.Events.MANIFEST_PARSED,function(e,d){log('✅ HLS OK! '+d.levels.length+' levels');bHQ(d.levels);vid.play().catch(function(){})});
-  hlsP.on(Hls.Events.LEVEL_SWITCHED,function(e,d){uHQ(d.level)});
-  hlsP.on(Hls.Events.ERROR,function(e,d){log('HLS err: '+d.details+(d.fatal?' FATAL':''));if(d.fatal){if(d.type===Hls.ErrorTypes.NETWORK_ERROR)setTimeout(function(){hlsP.startLoad()},2000);else if(d.type===Hls.ErrorTypes.MEDIA_ERROR)hlsP.recoverMediaError()}});
+  var src=up?pU(u,h):u;
+  log('HLS source: '+src.substring(0,100));
+
+  hlsP=new Hls({
+    maxBufferLength:30,maxMaxBufferLength:60,enableWorker:true,startLevel:-1,
+    fragLoadingTimeOut:20000,manifestLoadingTimeOut:15000,levelLoadingTimeOut:15000
+  });
+  hlsP.loadSource(src);
+  hlsP.attachMedia(vid);
+
+  hlsP.on(Hls.Events.MANIFEST_PARSED,function(ev,data){
+    log('✅ HLS OK! '+data.levels.length+' levels');
+    bHQ(data.levels);
+    vid.play().catch(function(e){log('Autoplay blocked')});
+  });
+  hlsP.on(Hls.Events.LEVEL_SWITCHED,function(ev,data){uHQ(data.level)});
+  hlsP.on(Hls.Events.ERROR,function(ev,data){
+    log('❌ HLS: '+data.details+(data.fatal?' FATAL':''));
+    if(data.fatal){
+      if(data.type===Hls.ErrorTypes.NETWORK_ERROR){
+        log('Network error - retrying in 3s');
+        setTimeout(function(){try{hlsP.startLoad()}catch(e){}},3000);
+      }
+      else if(data.type===Hls.ErrorTypes.MEDIA_ERROR){log('Media error - recovering');hlsP.recoverMediaError()}
+      else{shErr('Fatal: '+data.details)}
+    }
+  });
 }
 
-// ========================
-// DASH - FIXED!
-// ========================
-function iDASH(u,h,d){
+// ================================
+// DASH + CLEARKEY - FIXED!
+// ================================
+function iDASH(u,h,drm){
   log('=== DASH INIT ===');
 
-  // Create player
-  dashP=dashjs.MediaPlayer().create();
+  if(typeof dashjs==='undefined'){shErr('dash.js not loaded');return}
 
-  // Basic settings only
+  dashP = dashjs.MediaPlayer().create();
+
+  // Settings
   dashP.updateSettings({
     streaming:{
       buffer:{fastSwitchEnabled:true},
@@ -310,248 +364,105 @@ function iDASH(u,h,d){
     }
   });
 
-  // ClearKey DRM
-  if(d && d.type==='clearkey'){
-    log('ClearKey: KID='+d.keyId+' KEY='+d.key);
+  // ===== CLEARKEY DRM =====
+  if(drm && drm.type==='clearkey'){
+    log('--- ClearKey Setup ---');
 
-    var clearkeys={};
+    // Convert keyId and key to base64url
+    var kidB64 = toBase64url(drm.keyId);
+    var keyB64 = toBase64url(drm.key);
 
-    // Try hex format
-    if(/^[0-9a-fA-F]+$/.test(d.keyId)){
-      var kidB64=hexToB64url(d.keyId);
-      var keyB64=hexToB64url(d.key);
-      if(kidB64 && keyB64){
-        clearkeys[kidB64]=keyB64;
-        log('Hex→B64url KID:'+kidB64+' KEY:'+keyB64);
+    log('KID input: '+drm.keyId);
+    log('KID base64url: '+kidB64);
+    log('KEY input: '+drm.key);
+    log('KEY base64url: '+keyB64);
+
+    if(kidB64 && keyB64){
+      var ck = {};
+      ck[kidB64] = keyB64;
+
+      var protData = {
+        'org.w3.clearkey': {
+          clearkeys: ck
+        }
+      };
+
+      log('Protection data: '+JSON.stringify(protData));
+
+      try{
+        dashP.setProtectionData(protData);
+        log('✅ ClearKey protection set!');
+      }catch(e){
+        log('❌ setProtectionData error: '+e.message);
       }
-      // Also add raw hex
-      clearkeys[d.keyId]=d.key;
     } else {
-      // Already base64 or base64url
-      clearkeys[d.keyId]=d.key;
-    }
-
-    var protData={
-      'org.w3.clearkey':{
-        clearkeys: clearkeys
-      }
-    };
-
-    try{
-      dashP.setProtectionData(protData);
-      log('✅ ClearKey set');
-    }catch(e){
-      log('ClearKey error: '+e.message);
+      log('❌ Key conversion failed!');
     }
   }
 
-  // Register events SAFELY - only use events that exist
-  safeOn('streamInitialized', function(){
-    log('✅ DASH Stream Ready!');
-    setTimeout(function(){
-      bDQ();
-      vid.play().then(function(){log('▶ Playing')}).catch(function(e){log('Autoplay blocked')});
-    },1500);
-  });
+  // ===== EVENTS - SAFE REGISTRATION =====
+  var events = dashjs.MediaPlayer.events;
+  log('Available events check...');
 
-  safeOn('qualityChangeRendered', function(e){
-    if(e && e.mediaType==='video') uDQ(e.newQuality);
-  });
+  // Stream Initialized
+  if(events.STREAM_INITIALIZED){
+    dashP.on(events.STREAM_INITIALIZED, function(){
+      log('✅ DASH Stream Initialized');
+      setTimeout(function(){
+        bDQ();
+        vid.play().then(function(){log('▶ Playing')}).catch(function(){log('Autoplay blocked')});
+      },1500);
+    });
+    log('✓ STREAM_INITIALIZED registered');
+  }
 
-  safeOn('error', function(e){
-    log('❌ DASH err: '+(e&&e.error?JSON.stringify(e.error).substring(0,150):'unknown'));
-  });
+  // Quality Change
+  if(events.QUALITY_CHANGE_RENDERED){
+    dashP.on(events.QUALITY_CHANGE_RENDERED, function(e){
+      if(e && e.mediaType==='video') uDQ(e.newQuality);
+    });
+    log('✓ QUALITY_CHANGE_RENDERED registered');
+  }
 
-  safeOn('playbackError', function(e){
-    log('❌ Playback err');
-  });
+  // Error
+  if(events.ERROR){
+    dashP.on(events.ERROR, function(e){
+      var msg = 'unknown';
+      try{msg=JSON.stringify(e.error||e).substring(0,200)}catch(x){msg=String(e)}
+      log('❌ DASH Error: '+msg);
+    });
+    log('✓ ERROR registered');
+  }
 
-  // Initialize with direct URL (no proxy for DASH)
+  // Playback Error (might not exist in all versions)
+  try{
+    if(events.PLAYBACK_ERROR){
+      dashP.on(events.PLAYBACK_ERROR, function(e){
+        log('❌ Playback error');
+      });
+    }
+  }catch(e){}
+
+  // Protection events (might not exist)
+  try{
+    if(events.KEY_SESSION_CREATED) dashP.on(events.KEY_SESSION_CREATED, function(){log('🔑 Key session created')});
+    if(events.KEY_STATUSES_CHANGED) dashP.on(events.KEY_STATUSES_CHANGED, function(){log('🔑 Key status changed')});
+    if(events.PROTECTION_CREATED) dashP.on(events.PROTECTION_CREATED, function(){log('🔑 Protection created')});
+  }catch(e){}
+
+  // ===== INITIALIZE =====
   try{
     dashP.initialize(vid, u, false);
-    log('DASH initialized: '+u.substring(0,80));
+    log('✅ DASH initialized with URL: '+u.substring(0,80));
   }catch(e){
-    log('DASH init error: '+e.message);
+    log('❌ DASH init failed: '+e.message);
     shErr('DASH init failed: '+e.message);
   }
 }
 
-// Safe event registration - won't crash if event doesn't exist
-function safeOn(eventName, callback){
-  if(!dashP) return;
-
-  // Try to find the event constant
-  var evts=dashjs.MediaPlayer.events;
-  var found=null;
-
-  // Map short names to possible constant names
-  var nameMap={
-    'streamInitialized':'STREAM_INITIALIZED',
-    'qualityChangeRendered':'QUALITY_CHANGE_RENDERED',
-    'error':'ERROR',
-    'playbackError':'PLAYBACK_ERROR',
-    'bufferEmpty':'BUFFER_EMPTY',
-    'bufferLoaded':'BUFFER_LOADED'
-  };
-
-  var constName=nameMap[eventName];
-
-  if(constName && evts && evts[constName]){
-    found=evts[constName];
-  }
-
-  if(found){
-    try{
-      dashP.on(found, callback);
-      log('Event registered: '+constName);
-    }catch(e){
-      log('Event reg failed: '+constName+' - '+e.message);
-    }
-  } else {
-    // Try string directly
-    try{
-      dashP.on(eventName, callback);
-      log('Event registered (string): '+eventName);
-    }catch(e){
-      log('Event skip: '+eventName);
-    }
-  }
-}
-
-function hexToB64url(hex){
-  if(!hex)return null;
-  if(!/^[0-9a-fA-F]+$/.test(hex))return null;
-  try{
-    var bytes=[];
-    for(var i=0;i<hex.length;i+=2) bytes.push(parseInt(hex.substr(i,2),16));
-    var b64=btoa(String.fromCharCode.apply(null,bytes));
-    return b64.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-  }catch(e){return null}
-}
-
-// ========================
+// ================================
 // QUALITY
-// ========================
+// ================================
 function bHQ(l){
   qM.innerHTML='<div class="mn-t">Quality</div>';
-  var a=mO('Auto',-1,true);a.onclick=function(e){e.stopPropagation();sHQ(-1)};qM.appendChild(a);
-  l.map(function(v,i){return{h:v.height,b:v.bitrate,i:i}}).sort(function(a,b){return(b.h||0)-(a.h||0)}).forEach(function(v){
-    var lb=v.h?v.h+'p':Math.round((v.b||0)/1000)+'kbps';
-    var bd='';if(v.h>=2160)bd='4K';else if(v.h>=1080)bd='FHD';else if(v.h>=720)bd='HD';
-    var o=mO(lb,v.i,false,bd);o.onclick=function(e){e.stopPropagation();sHQ(v.i)};qM.appendChild(o);
-  });
-}
-
-function mO(lb,lv,ac,bd){var d=document.createElement('div');d.className='mn-o'+(ac?' act':'');d.dataset.lv=lv;d.innerHTML=lb+(bd?'<span class="qb">'+bd+'</span>':'');return d}
-
-function sHQ(lv){if(!hlsP)return;hlsP.currentLevel=lv;qM.querySelectorAll('.mn-o').forEach(function(o){o.classList.toggle('act',parseInt(o.dataset.lv)===lv)});cQ.textContent=lv===-1?'Auto':(hlsP.levels[lv]&&hlsP.levels[lv].height?hlsP.levels[lv].height+'p':'Custom');qM.classList.remove('show')}
-
-function uHQ(lv){if(!hlsP||!hlsP.levels[lv])return;var l=hlsP.levels[lv];var lb=l.height?l.height+'p':Math.round(l.bitrate/1000)+'kbps';if(hlsP.currentLevel===-1)cQ.textContent='Auto ('+lb+')'}
-
-function bDQ(){
-  if(!dashP)return;
-  var ls;
-  try{ls=dashP.getBitrateInfoListFor('video')}catch(e){log('No quality info');return}
-  if(!ls||!ls.length){log('0 DASH levels');return}
-  log(ls.length+' DASH levels');
-  qM.innerHTML='<div class="mn-t">Quality</div>';
-  var a=mO('Auto',-1,true);a.onclick=function(e){e.stopPropagation();sDQ(-1)};qM.appendChild(a);
-  var sorted=ls.slice().sort(function(a,b){return(b.height||0)-(a.height||0)});
-  sorted.forEach(function(i){
-    var lb=i.height?i.height+'p':Math.round(i.bitrate/1000)+'kbps';
-    var bd='';if(i.height>=2160)bd='4K';else if(i.height>=1080)bd='FHD';else if(i.height>=720)bd='HD';
-    var o=mO(lb,i.qualityIndex,false,bd);o.onclick=function(e){e.stopPropagation();sDQ(i.qualityIndex)};qM.appendChild(o);
-  });
-}
-
-function sDQ(qi){
-  if(!dashP)return;
-  try{
-    if(qi===-1){dashP.updateSettings({streaming:{abr:{autoSwitchBitrate:{video:true}}}});cQ.textContent='Auto'}
-    else{dashP.updateSettings({streaming:{abr:{autoSwitchBitrate:{video:false}}}});dashP.setQualityFor('video',qi);var ls=dashP.getBitrateInfoListFor('video');var i=ls.find(function(l){return l.qualityIndex===qi});cQ.textContent=i&&i.height?i.height+'p':Math.round((i&&i.bitrate||0)/1000)+'kbps'}
-  }catch(e){log('Quality set err: '+e.message)}
-  qM.querySelectorAll('.mn-o').forEach(function(o){o.classList.toggle('act',parseInt(o.dataset.lv)===qi)});qM.classList.remove('show');
-}
-
-function uDQ(qi){
-  try{var ls=dashP.getBitrateInfoListFor('video');if(!ls||!ls[qi])return;var lb=ls[qi].height?ls[qi].height+'p':Math.round(ls[qi].bitrate/1000)+'kbps';var s=dashP.getSettings();if(s.streaming.abr.autoSwitchBitrate.video)cQ.textContent='Auto ('+lb+')'}catch(e){}
-}
-
-// ========================
-// CONTROLS
-// ========================
-function tgl(){vid.paused?vid.play().catch(function(){}):vid.pause()}
-vid.onplay=function(){ppI.textContent='pause';bigP.classList.add('hide')};
-vid.onpause=function(){ppI.textContent='play_arrow';bigP.classList.remove('hide')};
-vid.onwaiting=function(){bufO.classList.add('show')};
-vid.oncanplay=function(){bufO.classList.remove('show')};
-vid.onplaying=function(){bufO.classList.remove('show')};
-vid.onerror=function(){log('❌ Vid err: '+(vid.error?vid.error.code+' '+vid.error.message:'?'))};
-
-ppB.onclick=function(e){e.stopPropagation();tgl()};
-bigP.onclick=function(e){e.stopPropagation();tgl()};
-skB.onclick=function(e){e.stopPropagation();vid.currentTime=Math.max(0,vid.currentTime-10);shT('replay_10','-10s')};
-skF.onclick=function(e){e.stopPropagation();vid.currentTime=Math.min(vid.duration||Infinity,vid.currentTime+10);shT('forward_10','+10s')};
-mtB.onclick=function(e){e.stopPropagation();vid.muted=!vid.muted;uV()};
-vS.oninput=function(){vid.volume=vS.value/100;vid.muted=false;uV()};
-function uV(){vI.textContent=vid.muted||vid.volume===0?'volume_off':vid.volume<.5?'volume_down':'volume_up';vS.value=vid.muted?0:vid.volume*100}
-
-vid.ontimeupdate=function(){
-  if(!vid.duration||!isFinite(vid.duration)){tmD.textContent=fmt(vid.currentTime)+' / LIVE';prPl.style.width='100%';return}
-  var p=(vid.currentTime/vid.duration)*100;prPl.style.width=p+'%';prTh.style.left=p+'%';tmD.textContent=fmt(vid.currentTime)+' / '+fmt(vid.duration);
-};
-vid.onprogress=function(){if(vid.buffered.length>0&&vid.duration&&isFinite(vid.duration))prBf.style.width=(vid.buffered.end(vid.buffered.length-1)/vid.duration*100)+'%'};
-
-var skg=false;
-prW.onmousedown=stSk;prW.ontouchstart=stSk;
-function stSk(e){skg=true;doSk(e);document.addEventListener('mousemove',doSk);document.addEventListener('mouseup',spSk);document.addEventListener('touchmove',doSk,{passive:true});document.addEventListener('touchend',spSk)}
-function doSk(e){if(!skg||!vid.duration||!isFinite(vid.duration))return;var r=prW.getBoundingClientRect();var x=e.touches?e.touches[0].clientX:e.clientX;vid.currentTime=Math.max(0,Math.min(1,(x-r.left)/r.width))*vid.duration}
-function spSk(){skg=false;document.removeEventListener('mousemove',doSk);document.removeEventListener('mouseup',spSk);document.removeEventListener('touchmove',doSk);document.removeEventListener('touchend',spSk)}
-
-qB.onclick=function(e){e.stopPropagation();spM.classList.remove('show');qM.classList.toggle('show')};
-spB.onclick=function(e){e.stopPropagation();qM.classList.remove('show');spM.classList.toggle('show')};
-document.querySelectorAll('#spM .mn-o').forEach(function(o){o.onclick=function(e){e.stopPropagation();var s=parseFloat(o.dataset.s);vid.playbackRate=s;document.querySelectorAll('#spM .mn-o').forEach(function(x){x.classList.remove('act')});o.classList.add('act');cS.textContent=s===1?'1x':s+'x';spM.classList.remove('show')}});
-piB.onclick=function(e){e.stopPropagation();try{document.pictureInPictureElement?document.exitPictureInPicture():vid.requestPictureInPicture()}catch(x){}};
-fsB.onclick=function(e){e.stopPropagation();tFS()};
-function tFS(){if(!document.fullscreenElement&&!document.webkitFullscreenElement){var el=document.documentElement;(el.requestFullscreen||el.webkitRequestFullscreen).call(el)}else{(document.exitFullscreen||document.webkitExitFullscreen).call(document)}}
-document.addEventListener('fullscreenchange',fC);document.addEventListener('webkitfullscreenchange',fC);
-function fC(){var f=document.fullscreenElement||document.webkitFullscreenElement;document.body.classList.toggle('fsa',!!f);fsI.textContent=f?'fullscreen_exit':'fullscreen'}
-
-function shC(){pB.classList.add('cv');clearTimeout(ctTO);ctTO=setTimeout(function(){if(!vid.paused)pB.classList.remove('cv')},3000)}
-pB.onmousemove=shC;pB.addEventListener('touchstart',shC,{passive:true});
-
-pB.onclick=function(e){
-  if(e.target.closest('.ct')||e.target.closest('.bp'))return;
-  qM.classList.remove('show');spM.classList.remove('show');
-  taps++;
-  if(taps===1){dbTO2=setTimeout(function(){taps=0;tgl()},300)}
-  else if(taps===2){clearTimeout(dbTO2);taps=0;var r=pB.getBoundingClientRect();var x=e.clientX-r.left;
-    if(x<r.width/2){vid.currentTime=Math.max(0,vid.currentTime-10);var b=$('sL');b.classList.add('show');setTimeout(function(){b.classList.remove('show')},500)}
-    else{vid.currentTime=Math.min(vid.duration||Infinity,vid.currentTime+10);var b=$('sR');b.classList.add('show');setTimeout(function(){b.classList.remove('show')},500)}}
-};
-
-document.onclick=function(e){if(!e.target.closest('#qB'))qM.classList.remove('show');if(!e.target.closest('#spB'))spM.classList.remove('show')};
-function shT(i,t){tI.textContent=i;tT.textContent=t;tst.classList.add('show');clearTimeout(tsTO);tsTO=setTimeout(function(){tst.classList.remove('show')},700)}
-
-document.onkeydown=function(e){
-  if(e.target.tagName==='INPUT')return;
-  switch(e.key.toLowerCase()){
-    case' ':case'k':e.preventDefault();tgl();shT(vid.paused?'play_arrow':'pause',vid.paused?'Paused':'Playing');break;
-    case'arrowleft':e.preventDefault();vid.currentTime=Math.max(0,vid.currentTime-10);shT('replay_10','-10s');break;
-    case'arrowright':e.preventDefault();vid.currentTime=Math.min(vid.duration||Infinity,vid.currentTime+10);shT('forward_10','+10s');break;
-    case'arrowup':e.preventDefault();vid.volume=Math.min(1,vid.volume+.1);vS.value=vid.volume*100;uV();shT('volume_up',Math.round(vid.volume*100)+'%');break;
-    case'arrowdown':e.preventDefault();vid.volume=Math.max(0,vid.volume-.1);vS.value=vid.volume*100;uV();shT('volume_down',Math.round(vid.volume*100)+'%');break;
-    case'f':e.preventDefault();tFS();break;
-    case'm':e.preventDefault();vid.muted=!vid.muted;uV();shT(vid.muted?'volume_off':'volume_up',vid.muted?'Muted':'Unmuted');break;
-    case'p':e.preventDefault();piB.click();break;
-    case'q':e.preventDefault();qM.classList.toggle('show');break;
-  }
-  shC();
-};
-
-function fmt(s){if(!isFinite(s)||isNaN(s))return'0:00';var h=Math.floor(s/3600),m=Math.floor(s%3600/60),sc=Math.floor(s%60);return h>0?h+':'+String(m).padStart(2,'0')+':'+String(sc).padStart(2,'0'):m+':'+String(sc).padStart(2,'0')}
-window.onbeforeunload=function(){if(hlsP)hlsP.destroy();if(dashP)try{dashP.reset()}catch(e){}};
-init();
-</script>
-</body>
-</html>
+  var 
