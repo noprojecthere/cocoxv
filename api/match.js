@@ -4,26 +4,32 @@ module.exports = (req, res) => {
   res.setHeader('Access-Control-Allow-Headers', '*');
   res.setHeader('Content-Type', 'application/json');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
 
   const { id } = req.query;
-
   if (!id) {
     return res.status(400).json({
       error: 'Match ID required',
-      usage: 'yoursite.vercel.app/?id=match1',
-      available: Object.keys(matches)
+      usage: '?id=match1',
+      available: Object.keys(getMatches())
     });
   }
 
+  const matches = getMatches();
   const safeId = id.replace(/[^a-zA-Z0-9_-]/g, '');
 
-  // =============================================
-  // ✅ SAARE MATCHES YAHAN ADD KARO
-  // =============================================
-  const matches = {
+  if (matches[safeId]) {
+    return res.status(200).json(matches[safeId]);
+  }
+
+  return res.status(404).json({
+    error: 'Match "' + safeId + '" not found',
+    available: Object.keys(matches)
+  });
+};
+
+function getMatches() {
+  return {
 
     "match1": {
       "title": "🔴 England vs West Indies - STAR HINDI 🇮🇳",
@@ -43,31 +49,44 @@ module.exports = (req, res) => {
       "title": "🏏 England vs West Indies - WILLOW",
       "logo": "http://api.sofascore.com/api/v1/unique-tournament/11185/image/dark",
       "group": "Cricket",
+      "url": "https://otte.live.fly.ww.aiv-cdn.net/sin-nitro/live/clients/dash/enc/cqqpbb9tmi/out/v1/62a1d9fa14bb4acfad5085e413df06c0/cenc.mpd",
+      "type": "dash",
+      "headers": {},
+      "drm": {
+        "type": "clearkey",
+        "keyId": "0aec2fcbea8d842e2d6196fc12fc5208",
+        "key": "ea343Yey5fNjkT37Rdfpc3NWwY6vLZXoCtT3"
+      }
+    },
+
+    "test": {
+      "title": "🧪 Test - Big Buck Bunny HLS",
+      "logo": "",
+      "group": "Test",
       "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
       "type": "hls",
       "headers": {},
       "drm": null
-    }
+    },
 
-    // ✅ NAYA MATCH ADD KARNA HO TO:
-    // "match3": {
-    //   "title": "Match Name",
-    //   "logo": "logo_url",
-    //   "group": "Cricket",
-    //   "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
-    //   "type": "hls",
-    //   "headers": {},
-    //   "drm": null
-    // }
+    "testdash": {
+      "title": "🧪 Test - DASH Stream",
+      "logo": "",
+      "group": "Test",
+      "url": "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd",
+      "type": "dash",
+      "headers": {},
+      "drm": null
+    },
 
-  };
-
-  if (matches[safeId]) {
-    return res.status(200).json(matches[safeId]);
-  }
-
-  return res.status(404).json({
-    error: 'Match "' + safeId + '" not found',
-    available: Object.keys(matches)
-  });
-};
+    "testdrm": {
+      "title": "🧪 Test - DASH ClearKey DRM",
+      "logo": "",
+      "group": "Test",
+      "url": "https://media.axprod.net/TestVectors/v7-MultiDRM-SingleKey/Manifest_1080p_ClearKey.mpd",
+      "type": "dash",
+      "headers": {},
+      "drm": {
+        "type": "clearkey",
+        "keyId": "nrLPy+jMhNYmqbNHk7pIUQ==",
+        "key": 
