@@ -1,0 +1,9 @@
+{
+  "name": "stream-video-player",
+  "version": "1.0.0",
+  "description": "Multi-match stream video player with HLS, DASH, ClearKey support",
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "dependencies": {}
+}
