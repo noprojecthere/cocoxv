@@ -1,8 +1,4 @@
-const path = require('path');
-const fs = require('fs');
-
 module.exports = (req, res) => {
-  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', '*');
@@ -17,48 +13,18 @@ module.exports = (req, res) => {
   if (!id) {
     return res.status(400).json({
       error: 'Match ID required',
-      usage: 'Use ?id=match1'
+      usage: 'yoursite.vercel.app/?id=match1',
+      available: Object.keys(matches)
     });
   }
 
-  // Sanitize
   const safeId = id.replace(/[^a-zA-Z0-9_-]/g, '');
 
-  // Try multiple paths (Vercel ke different build locations)
-  const possiblePaths = [
-    path.join(process.cwd(), 'public', 'matches', `${safeId}.json`),
-    path.join(process.cwd(), 'matches', `${safeId}.json`),
-    path.join(__dirname, '..', 'public', 'matches', `${safeId}.json`),
-    path.join(__dirname, '..', 'matches', `${safeId}.json`)
-  ];
+  // =============================================
+  // ✅ SAARE MATCHES YAHAN ADD KARO
+  // =============================================
+  const matches = {
 
-  for (const filePath of possiblePaths) {
-    try {
-      if (fs.existsSync(filePath)) {
-        const raw = fs.readFileSync(filePath, 'utf-8');
-        const data = JSON.parse(raw);
-        return res.status(200).json(data);
-      }
-    } catch (e) {
-      continue;
-    }
-  }
-
-  // If file not found, try embedded matches
-  const embeddedMatches = getEmbeddedMatches();
-  if (embeddedMatches[safeId]) {
-    return res.status(200).json(embeddedMatches[safeId]);
-  }
-
-  return res.status(404).json({
-    error: `Match "${safeId}" not found`,
-    available: Object.keys(embeddedMatches)
-  });
-};
-
-// BACKUP: Agar JSON files na milein to ye embedded data use hoga
-function getEmbeddedMatches() {
-  return {
     "match1": {
       "title": "🔴 England vs West Indies - STAR HINDI 🇮🇳",
       "logo": "http://api.sofascore.com/api/v1/unique-tournament/11185/image/dark",
@@ -72,6 +38,7 @@ function getEmbeddedMatches() {
       },
       "drm": null
     },
+
     "match2": {
       "title": "🏏 England vs West Indies - WILLOW",
       "logo": "http://api.sofascore.com/api/v1/unique-tournament/11185/image/dark",
@@ -85,5 +52,26 @@ function getEmbeddedMatches() {
         "key": "ea343Yey5fNjkT37Rdfpc3NWwY6vLZXoCtT3"
       }
     }
+
+    // ✅ NAYA MATCH ADD KARNA HO TO:
+    // "match3": {
+    //   "title": "Match Name",
+    //   "logo": "logo_url",
+    //   "group": "Cricket",
+    //   "url": "stream_url",
+    //   "type": "hls",
+    //   "headers": {},
+    //   "drm": null
+    // }
+
   };
-}
+
+  if (matches[safeId]) {
+    return res.status(200).json(matches[safeId]);
+  }
+
+  return res.status(404).json({
+    error: 'Match "' + safeId + '" not found',
+    available: Object.keys(matches)
+  });
+};
