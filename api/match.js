@@ -54,15 +54,15 @@ module.exports = (req, res) => {
     }
 
     // ✅ NAYA MATCH ADD KARNA HO TO:
-    "match3": {
-      "title": "Match Name",
-      "logo": "logo_url",
-      "group": "Cricket",
-      "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
-      "type": "hls",
-      "headers": {},
-      "drm": null
-    }
+    // "match3": {
+    //   "title": "Match Name",
+    //   "logo": "logo_url",
+    //   "group": "Cricket",
+    //   "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+    //   "type": "hls",
+    //   "headers": {},
+    //   "drm": null
+    // }
 
   };
 
