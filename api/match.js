@@ -53,26 +53,16 @@ module.exports = (req, res) => {
       }
     }
 
-    "test": {
-  "title": "🧪 Test Stream - Big Buck Bunny",
-  "logo": "",
-  "group": "Test",
-  "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
-  "type": "hls",
-  "headers": {},
-  "drm": null
-    }
-
     // ✅ NAYA MATCH ADD KARNA HO TO:
-    // "match3": {
-    //   "title": "Match Name",
-    //   "logo": "logo_url",
-    //   "group": "Cricket",
-    //   "url": "stream_url",
-    //   "type": "hls",
-    //   "headers": {},
-    //   "drm": null
-    // }
+    "match3": {
+      "title": "Match Name",
+      "logo": "logo_url",
+      "group": "Cricket",
+      "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+      "type": "hls",
+      "headers": {},
+      "drm": null
+    }
 
   };
 
