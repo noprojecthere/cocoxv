@@ -2,7 +2,8 @@ const https = require('https');
 const http = require('http');
 const { URL } = require('url');
 
-module.exports = async (req, res) => {
+module.exports = (req, res) => {
+  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', '*');
@@ -15,7 +16,7 @@ module.exports = async (req, res) => {
   const headersParam = req.query.headers;
 
   if (!targetUrl) {
-    return res.status(400).json({ error: 'URL parameter required' });
+    return res.status(400).json({ error: 'url parameter required' });
   }
 
   let customHeaders = {};
@@ -23,101 +24,117 @@ module.exports = async (req, res) => {
     try {
       customHeaders = JSON.parse(decodeURIComponent(headersParam));
     } catch (e) {
-      // ignore parse errors
+      // ignore
     }
   }
 
   try {
-    const parsedUrl = new URL(targetUrl);
-    const protocol = parsedUrl.protocol === 'https:' ? https : http;
+    const parsed = new URL(targetUrl);
+    const lib = parsed.protocol === 'https:' ? https : http;
 
-    const requestHeaders = {
-      'User-Agent': customHeaders['User-Agent'] || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
+    const reqHeaders = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
+      'Accept': '*/*',
+      'Accept-Encoding': 'identity',
       ...customHeaders
     };
 
     const options = {
-      hostname: parsedUrl.hostname,
-      port: parsedUrl.port,
-      path: parsedUrl.pathname + parsedUrl.search,
+      hostname: parsed.hostname,
+      port: parsed.port || (parsed.protocol === 'https:' ? 443 : 80),
+      path: parsed.pathname + parsed.search,
       method: 'GET',
-      headers: requestHeaders
+      headers: reqHeaders,
+      timeout: 30000
     };
 
-    const proxyReq = protocol.request(options, (proxyRes) => {
-      // Forward content type
-      const contentType = proxyRes.headers['content-type'];
-      if (contentType) {
-        res.setHeader('Content-Type', contentType);
+    const proxyReq = lib.request(options, (proxyRes) => {
+      // Handle redirects
+      if ([301, 302, 303, 307, 308].includes(proxyRes.statusCode)) {
+        const location = proxyRes.headers['location'];
+        if (location) {
+          let redirectUrl = location;
+          if (!location.startsWith('http')) {
+            redirectUrl = `${parsed.protocol}//${parsed.host}${location}`;
+          }
+          const encodedHeaders = encodeURIComponent(JSON.stringify(customHeaders));
+          return res.redirect(`/api/proxy?url=${encodeURIComponent(redirectUrl)}&headers=${encodedHeaders}`);
+        }
       }
 
-      // Forward content length if present
-      if (proxyRes.headers['content-length']) {
-        res.setHeader('Content-Length', proxyRes.headers['content-length']);
-      }
+      const contentType = proxyRes.headers['content-type'] || '';
 
+      // Set response headers
       res.setHeader('Access-Control-Allow-Origin', '*');
-      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Cache-Control', 'no-cache, no-store');
 
-      res.status(proxyRes.statusCode);
+      if (proxyRes.headers['content-type']) {
+        res.setHeader('Content-Type', proxyRes.headers['content-type']);
+      }
 
-      // For m3u8 files, rewrite URLs to also go through proxy
-      if (contentType && (contentType.includes('mpegurl') || contentType.includes('m3u8') || targetUrl.endsWith('.m3u8'))) {
+      // Check if this is an m3u8 manifest
+      const isM3U8 = contentType.includes('mpegurl') ||
+                     contentType.includes('m3u8') ||
+                     targetUrl.includes('.m3u8');
+
+      // Check if this is an MPD manifest
+      const isMPD = contentType.includes('dash') ||
+                    contentType.includes('xml') ||
+                    targetUrl.includes('.mpd');
+
+      if (isM3U8) {
+        // Rewrite m3u8 URLs
         let body = '';
         proxyRes.setEncoding('utf-8');
-        proxyRes.on('data', (chunk) => {
-          body += chunk;
-        });
-        proxyRes.on('end', () => {
-          // Rewrite relative URLs in m3u8
-          const baseUrl = targetUrl.substring(0, targetUrl.lastIndexOf('/') + 1);
-          const encodedHeaders = encodeURIComponent(JSON.stringify(customHeaders));
-
-          const rewritten = body.replace(/^(?!#)(.+\.(ts|m3u8|m4s|mp4|key|aac|vtt).*)$/gm, (match) => {
-            let fullUrl;
-            if (match.startsWith('http://') || match.startsWith('https://')) {
-              fullUrl = match.trim();
-            } else {
-              fullUrl = baseUrl + match.trim();
-            }
-            return `/api/proxy?url=${encodeURIComponent(fullUrl)}&headers=${encodedHeaders}`;
-          });
-
-          // Also handle lines that are just paths without known extensions
-          const finalRewritten = rewritten.replace(/^(?!#)(?!\/api\/proxy)([^\s]+)$/gm, (match) => {
-            if (match.trim() === '') return match;
-            let fullUrl;
-            const trimmed = match.trim();
-            if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
-              fullUrl = trimmed;
-            } else {
-              fullUrl = baseUrl + trimmed;
-            }
-            return `/api/proxy?url=${encodeURIComponent(fullUrl)}&headers=${encodedHeaders}`;
-          });
-
-          res.send(finalRewritten);
-        });
-      } else if (contentType && (contentType.includes('dash') || contentType.includes('xml') || targetUrl.endsWith('.mpd'))) {
-        let body = '';
-        proxyRes.setEncoding('utf-8');
-        proxyRes.on('data', (chunk) => {
-          body += chunk;
-        });
+        proxyRes.on('data', chunk => body += chunk);
         proxyRes.on('end', () => {
           const baseUrl = targetUrl.substring(0, targetUrl.lastIndexOf('/') + 1);
           const encodedHeaders = encodeURIComponent(JSON.stringify(customHeaders));
 
-          // Rewrite media/init URLs in MPD
-          const rewritten = body.replace(/(media|initialization|sourceURL)="([^"]+)"/g, (match, attr, url) => {
+          const rewritten = body.split('\n').map(line => {
+            const trimmed = line.trim();
+
+            // Skip empty lines and comments
+            if (!trimmed || trimmed.startsWith('#')) {
+              // But check for URI= in EXT-X-KEY lines
+              if (trimmed.includes('URI="')) {
+                return trimmed.replace(/URI="([^"]+)"/, (match, uri) => {
+                  let fullUri = uri.startsWith('http') ? uri : baseUrl + uri;
+                  return `URI="/api/proxy?url=${encodeURIComponent(fullUri)}&headers=${encodedHeaders}"`;
+                });
+              }
+              return line;
+            }
+
+            // This is a URL line
+            let fullUrl = trimmed.startsWith('http') ? trimmed : baseUrl + trimmed;
+            return `/api/proxy?url=${encodeURIComponent(fullUrl)}&headers=${encodedHeaders}`;
+          }).join('\n');
+
+          res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+          res.status(200).send(rewritten);
+        });
+      } else if (isMPD) {
+        // Rewrite MPD URLs
+        let body = '';
+        proxyRes.setEncoding('utf-8');
+        proxyRes.on('data', chunk => body += chunk);
+        proxyRes.on('end', () => {
+          const baseUrl = targetUrl.substring(0, targetUrl.lastIndexOf('/') + 1);
+          const encodedHeaders = encodeURIComponent(JSON.stringify(customHeaders));
+
+          let rewritten = body;
+
+          // Rewrite media, initialization, sourceURL attributes
+          rewritten = rewritten.replace(/(media|initialization|sourceURL)="([^"]+)"/g, (match, attr, url) => {
             if (url.startsWith('http')) {
               return `${attr}="/api/proxy?url=${encodeURIComponent(url)}&headers=${encodedHeaders}"`;
             }
             return `${attr}="/api/proxy?url=${encodeURIComponent(baseUrl + url)}&headers=${encodedHeaders}"`;
           });
 
-          // Fix BaseURL
-          const finalRewritten = rewritten.replace(/<BaseURL>([^<]+)<\/BaseURL>/g, (match, url) => {
+          // Rewrite BaseURL
+          rewritten = rewritten.replace(/<BaseURL>([^<]+)<\/BaseURL>/g, (match, url) => {
             if (url.startsWith('http')) {
               return `<BaseURL>/api/proxy?url=${encodeURIComponent(url)}&headers=${encodedHeaders}</BaseURL>`;
             }
@@ -125,25 +142,31 @@ module.exports = async (req, res) => {
           });
 
           res.setHeader('Content-Type', 'application/dash+xml');
-          res.send(finalRewritten);
+          res.status(200).send(rewritten);
         });
       } else {
+        // Binary content - pipe directly
+        if (proxyRes.headers['content-length']) {
+          res.setHeader('Content-Length', proxyRes.headers['content-length']);
+        }
+        res.status(proxyRes.statusCode);
         proxyRes.pipe(res);
       }
     });
 
     proxyReq.on('error', (err) => {
-      console.error('Proxy error:', err);
-      res.status(500).json({ error: 'Proxy request failed', details: err.message });
+      console.error('Proxy error:', err.message);
+      res.status(502).json({ error: 'Proxy failed', details: err.message });
     });
 
-    proxyReq.setTimeout(30000, () => {
+    proxyReq.on('timeout', () => {
       proxyReq.destroy();
-      res.status(504).json({ error: 'Proxy request timeout' });
+      res.status(504).json({ error: 'Timeout' });
     });
 
     proxyReq.end();
+
   } catch (err) {
-    res.status(500).json({ error: 'Invalid URL or proxy error', details: err.message });
+    res.status(500).json({ error: 'Server error', details: err.message });
   }
 };
