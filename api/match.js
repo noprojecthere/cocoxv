@@ -60,7 +60,7 @@ function getMatches() {
     },
 
     "test": {
-      "title": "🧪 Test - Big Buck Bunny HLS",
+      "title": "🧪 Test - HLS (No Headers)",
       "logo": "",
       "group": "Test",
       "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
@@ -69,8 +69,21 @@ function getMatches() {
       "drm": null
     },
 
+    "testproxy": {
+      "title": "🧪 Test - HLS via Proxy",
+      "logo": "",
+      "group": "Test",
+      "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+      "type": "hls",
+      "headers": {
+        "Referer": "https://example.com/",
+        "Origin": "https://example.com"
+      },
+      "drm": null
+    },
+
     "testdash": {
-      "title": "🧪 Test - DASH Big Buck Bunny",
+      "title": "🧪 Test - DASH (No DRM)",
       "logo": "",
       "group": "Test",
       "url": "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd",
@@ -88,8 +101,8 @@ function getMatches() {
       "headers": {},
       "drm": {
         "type": "clearkey",
-        "keyId": "nrLPy+jMhNYmqbNHk7pIUQ==",
-        "key": "FmY0xnWCPCNaSpRG+tUuTQ=="
+        "keyId": "9eb2cfcbe8cc84d626a9b34793ba4851",
+        "key": "166634c675823c235a4a9446fad52e4d"
       }
     }
 
