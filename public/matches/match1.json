@@ -1,0 +1,13 @@
+{
+  "title": "🔴 England vs West Indies - STAR HINDI 🇮🇳",
+  "logo": "http://api.sofascore.com/api/v1/unique-tournament/11185/image/dark",
+  "group": "Cricket",
+  "url": "https://jcevents.hotstar.com/bpk-tv/f0e3e64ae415771d8e460317ce97aa5e/Fallback/f0e3e64ae415771d8e460317ce97aa5e.m3u8",
+  "type": "hls",
+  "headers": {
+    "Referer": "https://www.hotstar.com/",
+    "Origin": "https://www.hotstar.com",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
+  },
+  "drm": null
+}
